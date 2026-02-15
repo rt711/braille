@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Interactive Braille learning app with practice modes, games, and tutorials for mastering Braille writing">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Braille Learn">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJyYWlsbGUgTGVhcm5pbmcgQXBwIiwKICAic2hvcnRfbmFtZSI6ICJCcmFpbGxlIiwKICAiZGVzY3JpcHRpb24iOiAiTGVhcm4gQnJhaWxsZSB3aXRoIGludGVyYWN0aXZlIHByYWN0aWNlLCBnYW1lcywgYW5kIHR1dG9yaWFscyIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzY2N2VlYSIsCiAgInRoZW1lX2NvbG9yIjogIiM2NjdlZWEiLAogICJpY29ucyI6IFt7CiAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjM2NjdlZWEnLyUzRSUzQ3RleHQgeD0nNTAlMjUgeT0nNTUlMjUnIGZvbnQtc2l6ZT0nNjAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZpbGw9J3doaXRlJyUzRSVFMiVBMCU4MyUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsCiAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogIH1dCn0=">
+    <title>Braille Learning App</title>
+    <style>
+        :root {
+            --bg-gradient-1: #667eea;
+            --bg-gradient-2: #764ba2;
+            --card-bg: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #ddd;
+            --input-bg: white;
+            --dot-inactive: #ddd;
+            --dot-active: #667eea;
+            --alphabet-bg: #f8f9fa;
+            --progress-bg: #e0e0e0;
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --success-border: #c3e6cb;
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+            --error-border: #f5c6cb;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-1: #1a1a2e;
+            --bg-gradient-2: #16213e;
+            --card-bg: #0f3460;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8b8;
+            --border-color: #2a4a6a;
+            --input-bg: #1a3a5a;
+            --dot-inactive: #2a4a6a;
+            --dot-active: #667eea;
+            --alphabet-bg: #1a3a5a;
+            --progress-bg: #2a4a6a;
+            --success-bg: #1e4d2b;
+            --success-text: #a8e6a3;
+            --success-border: #2d6a3a;
+            --error-bg: #4d1e1e;
+            --error-text: #f5a3a3;
+            --error-border: #6a2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        html {
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: var(--alphabet-bg);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .icon-btn:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1em;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .mode-btn:focus {
+            outline: 3px solid white;
+            outline-offset: 2px;
+        }
+
+        .braille-cell {
+            display: inline-grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            padding: 15px;
+            background: var(--alphabet-bg);
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--dot-inactive);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .dot:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .dot.active {
+            background: var(--dot-active);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .braille-display {
+            font-size: 5em;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Segoe UI Symbol', 'DejaVu Sans';
+            color: #667eea;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            transition: border-color 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn:focus {
+            outline: 3px solid white;
+            outline-offset: 2px;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .score-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .alphabet-item {
+            background: var(--alphabet-bg);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .alphabet-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .alphabet-item:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .alphabet-letter {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .alphabet-braille {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        .alphabet-pattern {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .feedback.correct {
+            background: var(--success-bg);
+            color: var(--success-text);
+            border: 2px solid var(--success-border);
+        }
+
+        .feedback.incorrect {
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 2px solid var(--error-border);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .braille-cell-guide {
+            display: inline-grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            padding: 10px;
+            background: var(--alphabet-bg);
+            border-radius: 10px;
+            margin: 10px auto;
+        }
+
+        .guide-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .guide-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .translation-output {
+            background: var(--alphabet-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            min-height: 60px;
+        }
+
+        .translation-braille {
+            font-size: 2em;
+            color: #667eea;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .game-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .attempts-remaining {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .game-type-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .game-type-btn {
+            background: var(--alphabet-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .game-type-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .game-type-btn:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        .tutorial-progress {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .tutorial-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--dot-inactive);
+            transition: all 0.3s;
+        }
+
+        .tutorial-dot.completed {
+            background: #28a745;
+        }
+
+        .tutorial-dot.current {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            z-index: 999;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .skip-link:focus {
+            left: 10px;
+            top: 10px;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .sr-only {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        #screen-reader-announcer {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .mode-btn,
+            .btn,
+            .icon-btn,
+            .dot,
+            .alphabet-item,
+            .game-type-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .mode-btn {
+                padding: 25px 20px;
+            }
+            
+            .btn {
+                padding: 15px 35px;
+                font-size: 1.1em;
+            }
+            
+            .dot {
+                width: 35px;
+                height: 35px;
+            }
+            
+            input[type="text"] {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .header-controls {
+                position: static;
+                justify-content: center;
+                margin-top: 15px;
+                gap: 15px;
+            }
+            
+            .icon-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4em;
+            }
+
+            .mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mode-btn {
+                padding: 25px 15px;
+                font-size: 1.1em;
+            }
+
+            .braille-display {
+                font-size: 4em;
+            }
+
+            .alphabet-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                gap: 12px;
+            }
+            
+            .alphabet-item {
+                padding: 18px;
+            }
+            
+            .score-board {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .score-item {
+                min-width: 100%;
+                padding: 20px;
+            }
+            
+            .braille-cell {
+                gap: 12px;
+                padding: 20px;
+            }
+            
+            .guide-dot {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .game-type-selector {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .game-type-btn {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 1.4em;
+                margin-bottom: 8px;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+            }
+            
+            header {
+                padding: 15px;
+            }
+
+            .braille-display {
+                font-size: 3.5em;
+                margin: 15px 0;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .mode-btn {
+                padding: 20px;
+            }
+            
+            input[type="text"] {
+                padding: 18px;
+                font-size: 16px;
+            }
+            
+            .alphabet-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .alphabet-item {
+                padding: 12px;
+            }
+            
+            .alphabet-letter {
+                font-size: 1.3em;
+            }
+            
+            .alphabet-braille {
+                font-size: 1.8em;
+            }
+            
+            .alphabet-pattern {
+                font-size: 0.7em;
+            }
+            
+            .score-value {
+                font-size: 1.8em;
+            }
+            
+            .game-info h3 {
+                font-size: 1.3em;
+            }
+            
+            .attempts-remaining {
+                font-size: 2em;
+            }
+        }
+        
+        /* Landscape mode optimizations */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .braille-display {
+                font-size: 2.5em;
+                margin: 10px 0;
+            }
+            
+            .score-board {
+                flex-direction: row;
+            }
+            
+            .button-group {
+                flex-direction: row;
+            }
+            
+            .button-group .btn {
+                width: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Screen Reader Announcements -->
+    <div id="screen-reader-announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="screen-reader-announcer-assertive" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    
+    <div class="container">
+        <header>
+            <div class="header-controls">
+                <button class="icon-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode. Currently light mode" id="dark-mode-btn" title="Toggle dark mode">
+                    <span id="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+                <button class="icon-btn" onclick="toggleFontSize()" aria-label="Increase font size" title="Increase font size">
+                    <span aria-hidden="true">A+</span>
+                </button>
+                <button class="icon-btn" onclick="toggleAudio()" aria-label="Toggle audio feedback. Currently off" id="audio-btn" title="Toggle audio feedback">
+                    <span id="audio-icon" aria-hidden="true">🔇</span>
+                </button>
+            </div>
+            <h1>⠃ Braille Learning App</h1>
+            <p class="subtitle">Master Braille writing through interactive practice</p>
+        </header>
+
+        <div class="card">
+            <div class="mode-selector" role="navigation" aria-label="Learning mode selection">
+                <button class="mode-btn" onclick="showMode('alphabet')" aria-label="Alphabet mode - View all Braille letters" aria-describedby="alphabet-desc">
+                    <span aria-hidden="true">📚</span> Alphabet
+                    <span id="alphabet-desc" class="visually-hidden">Browse the complete Braille alphabet with dot patterns</span>
+                </button>
+                <button class="mode-btn" onclick="showMode('practice')" aria-label="Practice mode - Quiz yourself" aria-describedby="practice-desc">
+                    <span aria-hidden="true">🎯</span> Practice
+                    <span id="practice-desc" class="visually-hidden">Test your knowledge with unlimited Braille to letter questions</span>
+                </button>
+                <button class="mode-btn" onclick="showMode('builder')" aria-label="Builder mode - Create Braille characters" aria-describedby="builder-desc">
+                    <span aria-hidden="true">🔨</span> Builder
+                    <span id="builder-desc" class="visually-hidden">Build Braille characters by selecting individual dots</span>
+                </button>
+                <button class="mode-btn" onclick="showMode('translate')" aria-label="Translate mode - Convert text to Braille" aria-describedby="translate-desc">
+                    <span aria-hidden="true">🔤</span> Translate
+                    <span id="translate-desc" class="visually-hidden">Type text and convert it to Braille characters</span>
+                </button>
+                <button class="mode-btn" onclick="showMode('game')" aria-label="Game mode - 10 question challenge" aria-describedby="game-desc">
+                    <span aria-hidden="true">🎮</span> Game
+                    <span id="game-desc" class="visually-hidden">Take a timed 10-question challenge to test your skills</span>
+                </button>
+                <button class="mode-btn" onclick="showMode('tutorial')" aria-label="Tutorial mode - Learn 5 characters" aria-describedby="tutorial-desc">
+                    <span aria-hidden="true">📖</span> Tutorial
+                    <span id="tutorial-desc" class="visually-hidden">Step-by-step tutorial to learn 5 random Braille characters</span>
+                </button>
+            </div>
+        </div>
+
+        <main id="main-content">
+            <!-- Alphabet Mode -->
+            <div id="alphabet-mode" class="card hidden" role="region" aria-labelledby="alphabet-heading">
+                <h2 id="alphabet-heading">Braille Alphabet Reference</h2>
+                <div class="guide-container">
+                    <p><strong>Braille Cell Numbering:</strong></p>
+                    <div class="braille-cell-guide">
+                        <div class="guide-dot" aria-label="Dot 1">1</div>
+                        <div class="guide-dot" aria-label="Dot 4">4</div>
+                        <div class="guide-dot" aria-label="Dot 2">2</div>
+                        <div class="guide-dot" aria-label="Dot 5">5</div>
+                        <div class="guide-dot" aria-label="Dot 3">3</div>
+                        <div class="guide-dot" aria-label="Dot 6">6</div>
+                    </div>
+                </div>
+                <div class="alphabet-grid" id="alphabet-grid" role="list"></div>
+            </div>
+
+            <!-- Practice Mode -->
+            <div id="practice-mode" class="card hidden" role="region" aria-labelledby="practice-heading">
+                <h2 id="practice-heading">Practice Mode</h2>
+                <div class="score-board" role="status" aria-live="polite" aria-label="Current scores">
+                    <div class="score-item">
+                        <div class="score-value" id="correct-count" aria-label="Correct answers">0</div>
+                        <div class="score-label">Correct</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-value" id="total-count" aria-label="Total questions">0</div>
+                        <div class="score-label">Total</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-value" id="accuracy" aria-label="Accuracy percentage">0%</div>
+                        <div class="score-label">Accuracy</div>
+                    </div>
+                </div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progress bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="feedback-area" role="alert" aria-live="assertive"></div>
+                <div class="braille-display" id="practice-braille" aria-label="Current braille character. Dots 1">⠁</div>
+                <p style="text-align: center; color: var(--text-secondary);" id="practice-hint">Dots: 1</p>
+                <form autocomplete="off" onsubmit="event.preventDefault(); checkAnswer(); return false;">
+                    <div class="input-group">
+                        <label for="practice-input" class="visually-hidden">Type the letter that matches the Braille character shown above</label>
+                        <input type="text" 
+                               id="practice-input" 
+                               name="fakeusernameremembered"
+                               placeholder="Type the letter..." 
+                               maxlength="1" 
+                               autocomplete="new-password" 
+                               autocapitalize="off"
+                               autocorrect="off"
+                               spellcheck="false"
+                               inputmode="text"
+                               aria-describedby="practice-hint practice-instructions">
+                        <span id="practice-instructions" class="visually-hidden">Enter a single letter from A to Z and press Enter or click Check Answer</span>
+                    </div>
+                </form>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="checkAnswer()">Check Answer</button>
+                    <button class="btn" onclick="skipQuestion()">Skip</button>
+                    <button class="btn btn-danger" onclick="resetPractice()">Reset Score</button>
+                </div>
+            </div>
+
+            <!-- Builder Mode -->
+            <div id="builder-mode" class="card hidden" role="region" aria-labelledby="builder-heading">
+                <h2 id="builder-heading">Braille Cell Builder</h2>
+                <p style="text-align: center; margin-bottom: 20px;">Click the dots to create Braille characters</p>
+                <div style="text-align: center;">
+                    <div class="braille-cell" id="builder-cell" role="group" aria-label="Braille cell builder. 6 dots arranged in 2 columns and 3 rows">
+                        <button class="dot" data-dot="1" onclick="toggleDot(1)" aria-label="Dot 1, top left, currently inactive" aria-pressed="false" id="builder-dot-1"></button>
+                        <button class="dot" data-dot="4" onclick="toggleDot(4)" aria-label="Dot 4, top right, currently inactive" aria-pressed="false" id="builder-dot-4"></button>
+                        <button class="dot" data-dot="2" onclick="toggleDot(2)" aria-label="Dot 2, middle left, currently inactive" aria-pressed="false" id="builder-dot-2"></button>
+                        <button class="dot" data-dot="5" onclick="toggleDot(5)" aria-label="Dot 5, middle right, currently inactive" aria-pressed="false" id="builder-dot-5"></button>
+                        <button class="dot" data-dot="3" onclick="toggleDot(3)" aria-label="Dot 3, bottom left, currently inactive" aria-pressed="false" id="builder-dot-3"></button>
+                        <button class="dot" data-dot="6" onclick="toggleDot(6)" aria-label="Dot 6, bottom right, currently inactive" aria-pressed="false" id="builder-dot-6"></button>
+                    </div>
+                </div>
+                <div class="braille-display" id="builder-result" aria-live="polite" aria-label="Current pattern result">⠀</div>
+                <p style="text-align: center; color: var(--text-secondary);" id="builder-letter" role="status" aria-live="polite">Select dots to form a letter</p>
+                <p style="text-align: center; color: var(--text-secondary);" id="builder-pattern" role="status" aria-live="polite">Active dots: none</p>
+                <div class="button-group">
+                    <button class="btn" onclick="clearBuilder()">Clear</button>
+                    <button class="btn btn-success" onclick="randomBraille()">Random Letter</button>
+                </div>
+            </div>
+
+            <!-- Translate Mode -->
+            <div id="translate-mode" class="card hidden" role="region" aria-labelledby="translate-heading">
+                <h2 id="translate-heading">Text to Braille Translator</h2>
+                <form autocomplete="off" onsubmit="event.preventDefault(); translateText(); return false;">
+                    <div class="translation-output">
+                        <p style="font-size: 1.2em; color: var(--text-secondary);">Enter text to convert to Braille:</p>
+                        <label for="translate-input" class="visually-hidden">Text to translate</label>
+                        <input type="text" 
+                               id="translate-input"
+                               name="fakeusernameremembered"
+                               placeholder="Type text here..." 
+                               style="width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid var(--border-color); border-radius: 10px; margin: 15px 0; background: var(--input-bg); color: var(--text-primary);"
+                               autocomplete="new-password"
+                               autocorrect="off"
+                               spellcheck="false">
+                        <div class="braille-display" id="translate-result" aria-live="polite">⠀</div>
+                    </div>
+                </form>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="translateText()">Convert</button>
+                    <button class="btn" onclick="clearTranslate()">Clear</button>
+                </div>
+            </div>
+
+            <!-- Game Mode -->
+            <div id="game-mode" class="card hidden" role="region" aria-labelledby="game-heading">
+                <h2 id="game-heading">Game Mode - 10 Attempts Challenge</h2>
+                
+                <div class="game-type-selector">
+                    <button class="game-type-btn active" id="braille-to-text-btn" onclick="setGameType('braille-to-text')">
+                        Braille → Text
+                    </button>
+                    <button class="game-type-btn" id="text-to-braille-btn" onclick="setGameType('text-to-braille')">
+                        Text → Braille
+                    </button>
+                </div>
+
+                <div class="game-info" role="status" aria-live="polite">
+                    <h3>Attempts Remaining</h3>
+                    <div class="attempts-remaining" id="attempts-remaining">10</div>
+                    <p>Score: <span id="game-score">0</span> / <span id="game-total">0</span></p>
+                </div>
+
+                <div id="game-question-area">
+                    <div class="braille-display" id="game-display">⠁</div>
+                    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;" id="game-prompt">What letter is this?</p>
+                    <form autocomplete="off" onsubmit="event.preventDefault(); checkGameAnswer(); return false;">
+                        <div class="input-group">
+                            <label for="game-input" class="visually-hidden">Your answer</label>
+                            <input type="text" 
+                                   id="game-input"
+                                   name="fakeusernameremembered"
+                                   placeholder="Type your answer..." 
+                                   maxlength="1" 
+                                   autocomplete="new-password"
+                                   autocapitalize="off"
+                                   autocorrect="off"
+                                   spellcheck="false"
+                                   inputmode="text">
+                        </div>
+                    </form>
+                    <div id="game-feedback" role="alert" aria-live="assertive"></div>
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="checkGameAnswer()">Submit</button>
+                        <button class="btn btn-danger" onclick="resetGame()">New Game</button>
+                    </div>
+                </div>
+
+                <div id="game-results" class="hidden">
+                    <h3 style="text-align: center; margin: 20px 0;">Game Over!</h3>
+                    <div class="score-board">
+                        <div class="score-item">
+                            <div class="score-value" id="final-game-score">0</div>
+                            <div class="score-label">Correct</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-value" id="final-game-accuracy">0%</div>
+                            <div class="score-label">Accuracy</div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="resetGame()">Play Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutorial Mode -->
+            <div id="tutorial-mode" class="card hidden" role="region" aria-labelledby="tutorial-heading">
+                <h2 id="tutorial-heading">Tutorial Mode - Learn 5 Random Characters</h2>
+                
+                <div class="tutorial-progress" role="status" aria-live="polite" aria-label="Tutorial progress">
+                    <div class="tutorial-dot" id="tutorial-dot-0"></div>
+                    <div class="tutorial-dot" id="tutorial-dot-1"></div>
+                    <div class="tutorial-dot" id="tutorial-dot-2"></div>
+                    <div class="tutorial-dot" id="tutorial-dot-3"></div>
+                    <div class="tutorial-dot" id="tutorial-dot-4"></div>
+                </div>
+
+                <div id="tutorial-content">
+                    <h3 style="text-align: center; margin: 20px 0; color: #667eea;" id="tutorial-step-title">Character <span id="tutorial-current">1</span> of 5</h3>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div style="font-size: 3em; font-weight: bold; color: #667eea; margin-bottom: 10px;" id="tutorial-letter">A</div>
+                        <div class="braille-display" id="tutorial-braille">⠁</div>
+                        <p style="color: var(--text-secondary); font-size: 1.2em; margin: 10px 0;">
+                            Dots: <span id="tutorial-pattern">1</span>
+                        </p>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div class="braille-cell" style="display: inline-grid;">
+                            <div class="guide-dot" id="tutorial-guide-1">1</div>
+                            <div class="guide-dot" id="tutorial-guide-4" style="background: var(--dot-inactive);">4</div>
+                            <div class="guide-dot" id="tutorial-guide-2" style="background: var(--dot-inactive);">2</div>
+                            <div class="guide-dot" id="tutorial-guide-5" style="background: var(--dot-inactive);">5</div>
+                            <div class="guide-dot" id="tutorial-guide-3" style="background: var(--dot-inactive);">3</div>
+                            <div class="guide-dot" id="tutorial-guide-6" style="background: var(--dot-inactive);">6</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn" onclick="previousTutorial()" id="prev-tutorial-btn" disabled>← Previous</button>
+                        <button class="btn btn-success" onclick="nextTutorial()" id="next-tutorial-btn">Next →</button>
+                        <button class="btn btn-danger" onclick="resetTutorial()">New Tutorial</button>
+                    </div>
+                </div>
+
+                <div id="tutorial-complete" class="hidden">
+                    <h3 style="text-align: center; color: #28a745; margin: 30px 0;">🎉 Tutorial Complete!</h3>
+                    <p style="text-align: center; font-size: 1.2em; margin: 20px 0;">
+                        You've learned 5 Braille characters! Try the Practice or Game mode to test your knowledge.
+                    </p>
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="resetTutorial()">Start New Tutorial</button>
+                        <button class="btn" onclick="showMode('practice')">Go to Practice</button>
+                        <button class="btn" onclick="showMode('game')">Go to Game</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            // Audio feedback settings
+            let audioEnabled = false;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Play audio feedback
+            function playTone(frequency, duration, type = 'success') {
+                if (!audioEnabled) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            }
+
+            function playSuccessSound() {
+                playTone(523.25, 0.15); // C5
+                setTimeout(() => playTone(659.25, 0.15), 150); // E5
+            }
+
+            function playErrorSound() {
+                playTone(293.66, 0.3); // D4
+            }
+
+            function playClickSound() {
+                playTone(440, 0.05); // A4
+            }
+
+            function toggleAudio() {
+                audioEnabled = !audioEnabled;
+                const audioBtn = document.getElementById('audio-btn');
+                const audioIcon = document.getElementById('audio-icon');
+                
+                if (audioEnabled) {
+                    audioIcon.textContent = '🔊';
+                    audioBtn.setAttribute('aria-label', 'Toggle audio feedback. Currently on');
+                    announceToScreenReader('Audio feedback enabled', true);
+                } else {
+                    audioIcon.textContent = '🔇';
+                    audioBtn.setAttribute('aria-label', 'Toggle audio feedback. Currently off');
+                    announceToScreenReader('Audio feedback disabled', true);
+                }
+            }
+
+            // Screen reader announcements
+            function announceToScreenReader(message, assertive = false) {
+                const announcer = assertive 
+                    ? document.getElementById('screen-reader-announcer-assertive')
+                    : document.getElementById('screen-reader-announcer');
+                
+                // Clear and announce
+                announcer.textContent = '';
+                setTimeout(() => {
+                    announcer.textContent = message;
+                }, 100);
+            }
+
+            // Describe Braille pattern for screen readers
+            function describeBraillePattern(pattern) {
+                if (!pattern || pattern === '') return 'No dots selected';
+                const dots = pattern.split('-');
+                if (dots.length === 1) {
+                    return `Dot ${dots[0]}`;
+                }
+                return `Dots ${dots.join(', ')}`;
+            }
+
+            // Braille alphabet mapping
+            const BRAILLE_ALPHABET = {
+                'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑',
+                'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
+                'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕',
+                'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
+                'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽',
+                'z': '⠵', ' ': ' '
+            };
+
+            // Braille dot patterns
+            const BRAILLE_PATTERNS = {
+                'a': '1', 'b': '1-2', 'c': '1-4', 'd': '1-4-5', 'e': '1-5',
+                'f': '1-2-4', 'g': '1-2-4-5', 'h': '1-2-5', 'i': '2-4', 'j': '2-4-5',
+                'k': '1-3', 'l': '1-2-3', 'm': '1-3-4', 'n': '1-3-4-5', 'o': '1-3-5',
+                'p': '1-2-3-4', 'q': '1-2-3-4-5', 'r': '1-2-3-5', 's': '2-3-4', 't': '2-3-4-5',
+                'u': '1-3-6', 'v': '1-2-3-6', 'w': '2-4-5-6', 'x': '1-3-4-6', 'y': '1-3-4-5-6',
+                'z': '1-3-5-6'
+            };
+
+            // Reverse mapping for practice mode
+            const LETTER_MAP = {};
+            for (const [letter, braille] of Object.entries(BRAILLE_ALPHABET)) {
+                LETTER_MAP[braille] = letter;
+            }
+
+            // Current state variables
+            let currentMode = 'alphabet';
+            let currentLetter = '';
+            let currentPattern = '';
+            let currentBraille = '';
+            let currentDots = [];
+            let correctCount = 0;
+            let totalCount = 0;
+            let feedback = '';
+
+            // Game mode variables
+            let gameAttempts = 10;
+            let gameScore = 0;
+            let gameTotal = 0;
+            let gameType = 'braille-to-text'; // or 'text-to-braille'
+
+            // Tutorial mode variables
+            let tutorialChars = [];
+            let tutorialIndex = 0;
+
+            // Dark mode and accessibility
+            let currentFontSize = 1;
+
+            // Initialize dark mode from storage
+            function initDarkMode() {
+                const savedTheme = localStorage.getItem('braille-theme');
+                if (savedTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.getElementById('theme-icon').textContent = '☀️';
+                    const darkModeBtn = document.getElementById('dark-mode-btn');
+                    if (darkModeBtn) {
+                        darkModeBtn.setAttribute('aria-label', 'Toggle dark mode. Currently dark mode');
+                    }
+                }
+            }
+
+            // Toggle dark mode
+            function toggleDarkMode() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('braille-theme', newTheme);
+                
+                const darkModeBtn = document.getElementById('dark-mode-btn');
+                document.getElementById('theme-icon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+                darkModeBtn.setAttribute('aria-label', `Toggle dark mode. Currently ${newTheme} mode`);
+                
+                announceToScreenReader(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode enabled`, true);
+                playClickSound();
+            }
+
+            // Toggle font size
+            function toggleFontSize() {
+                currentFontSize = currentFontSize >= 1.2 ? 1 : currentFontSize + 0.1;
+                document.documentElement.style.fontSize = `${currentFontSize * 16}px`;
+            }
+
+            // Initialize alphabet grid
+            function initAlphabetGrid() {
+                const grid = document.getElementById('alphabet-grid');
+                grid.innerHTML = '';
+                
+                for (const [letter, braille] of Object.entries(BRAILLE_ALPHABET)) {
+                    if (letter === ' ') continue;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'alphabet-item';
+                    item.setAttribute('role', 'listitem');
+                    item.setAttribute('tabindex', '0');
+                    item.innerHTML = `
+                        <div class="alphabet-letter">${letter.toUpperCase()}</div>
+                        <div class="alphabet-braille">${braille}</div>
+                        <div class="alphabet-pattern">Dots: ${BRAILLE_PATTERNS[letter]}</div>
+                    `;
+                    grid.appendChild(item);
+                }
+            }
+
+            // Show specific mode
+            function showMode(mode) {
+                // Hide all modes
+                document.getElementById('alphabet-mode').classList.add('hidden');
+                document.getElementById('practice-mode').classList.add('hidden');
+                document.getElementById('builder-mode').classList.add('hidden');
+                document.getElementById('translate-mode').classList.add('hidden');
+                document.getElementById('game-mode').classList.add('hidden');
+                document.getElementById('tutorial-mode').classList.add('hidden');
+                
+                // Show selected mode
+                document.getElementById(`${mode}-mode`).classList.remove('hidden');
+                
+                // Update mode buttons - find the button that corresponds to this mode
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    // Check if this button's onclick contains the current mode
+                    const onclickAttr = btn.getAttribute('onclick');
+                    if (onclickAttr && onclickAttr.includes(`'${mode}'`)) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Update current mode
+                currentMode = mode;
+                
+                // Announce mode change
+                const modeNames = {
+                    'alphabet': 'Alphabet Reference Mode',
+                    'practice': 'Practice Mode',
+                    'builder': 'Braille Builder Mode',
+                    'translate': 'Text to Braille Translator Mode',
+                    'game': 'Game Mode - 10 Question Challenge',
+                    'tutorial': 'Tutorial Mode - Learn 5 Characters'
+                };
+                announceToScreenReader(`Switched to ${modeNames[mode]}`, true);
+                playClickSound();
+                
+                // Initialize mode-specific functionality
+                if (mode === 'alphabet') {
+                    initAlphabetGrid();
+                } else if (mode === 'practice') {
+                    resetPractice();
+                } else if (mode === 'builder') {
+                    clearBuilder();
+                } else if (mode === 'translate') {
+                    document.getElementById('translate-input').value = '';
+                    document.getElementById('translate-result').textContent = '⠀';
+                } else if (mode === 'game') {
+                    resetGame();
+                } else if (mode === 'tutorial') {
+                    resetTutorial();
+                }
+            }
+
+            // Toggle dot in builder mode
+            function toggleDot(dotNum) {
+                const dot = document.getElementById(`builder-dot-${dotNum}`);
+                
+                const isActive = dot.classList.contains('active');
+                if (isActive) {
+                    dot.classList.remove('active');
+                    currentDots = currentDots.filter(d => d !== dotNum);
+                    dot.setAttribute('aria-pressed', 'false');
+                    dot.setAttribute('aria-label', `Dot ${dotNum}, ${getDotPosition(dotNum)}, currently inactive`);
+                } else {
+                    dot.classList.add('active');
+                    currentDots.push(dotNum);
+                    dot.setAttribute('aria-pressed', 'true');
+                    dot.setAttribute('aria-label', `Dot ${dotNum}, ${getDotPosition(dotNum)}, currently active`);
+                }
+                
+                currentDots.sort((a, b) => a - b);
+                updateBuilderResult();
+                
+                const pattern = currentDots.join('-');
+                const patternDesc = describeBraillePattern(pattern);
+                document.getElementById('builder-pattern').textContent = `Active dots: ${currentDots.length > 0 ? pattern : 'none'}`;
+                
+                playClickSound();
+            }
+
+            // Get dot position description
+            function getDotPosition(dotNum) {
+                const positions = {
+                    1: 'top left',
+                    2: 'middle left',
+                    3: 'bottom left',
+                    4: 'top right',
+                    5: 'middle right',
+                    6: 'bottom right'
+                };
+                return positions[dotNum];
+            }
+
+            // Update the builder result
+            function updateBuilderResult() {
+                const result = document.getElementById('builder-result');
+                
+                let braille = '';
+                for (let i = 1; i <= 6; i++) {
+                    braille += currentDots.includes(i) ? '●' : '○';
+                }
+                
+                const pattern = currentDots.join('-');
+                let letter = '';
+                for (const [l, p] of Object.entries(BRAILLE_PATTERNS)) {
+                    if (p === pattern) {
+                        letter = l;
+                        break;
+                    }
+                }
+                
+                result.textContent = braille;
+                const letterDisplay = document.getElementById('builder-letter');
+                if (letter) {
+                    letterDisplay.textContent = `Letter: ${letter.toUpperCase()}`;
+                    announceToScreenReader(`Pattern matches letter ${letter.toUpperCase()}`);
+                } else {
+                    letterDisplay.textContent = 'Select dots to form a letter';
+                }
+            }
+
+            // Clear the builder
+            function clearBuilder() {
+                for (let i = 1; i <= 6; i++) {
+                    const dot = document.getElementById(`builder-dot-${i}`);
+                    dot.classList.remove('active');
+                    dot.setAttribute('aria-pressed', 'false');
+                    dot.setAttribute('aria-label', `Dot ${i}, ${getDotPosition(i)}, currently inactive`);
+                }
+                currentDots = [];
+                updateBuilderResult();
+                document.getElementById('builder-pattern').textContent = 'Active dots: none';
+                announceToScreenReader('All dots cleared');
+                playClickSound();
+            }
+
+            // Generate a random Braille character
+            function randomBraille() {
+                const letters = Object.keys(BRAILLE_ALPHABET).filter(l => l !== ' ');
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                const pattern = BRAILLE_PATTERNS[randomLetter];
+                
+                clearBuilder();
+                
+                const dots = pattern.split('-').filter(d => d);
+                dots.forEach(dot => {
+                    document.querySelector(`.dot[data-dot="${dot}"]`).classList.add('active');
+                });
+                
+                currentDots = dots.map(d => parseInt(d));
+                updateBuilderResult();
+            }
+
+            // Reset practice mode
+            function resetPractice() {
+                correctCount = 0;
+                totalCount = 0;
+                updateScore();
+                showRandomQuestion();
+            }
+
+            // Show a random question
+            function showRandomQuestion() {
+                const letters = Object.keys(BRAILLE_ALPHABET).filter(l => l !== ' ');
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                currentLetter = randomLetter;
+                currentPattern = BRAILLE_PATTERNS[randomLetter];
+                currentBraille = BRAILLE_ALPHABET[randomLetter];
+                
+                document.getElementById('practice-braille').textContent = currentBraille;
+                const brailleElement = document.getElementById('practice-braille');
+                brailleElement.textContent = currentBraille;
+                brailleElement.setAttribute('aria-label', `Current braille character. ${describeBraillePattern(currentPattern)}`);
+                
+                document.getElementById('practice-hint').textContent = `Dots: ${currentPattern}`;
+                document.getElementById('practice-input').value = '';
+                document.getElementById('feedback-area').innerHTML = '';
+                document.getElementById('practice-input').focus();
+                
+                announceToScreenReader(`New question. Braille pattern: ${describeBraillePattern(currentPattern)}. What letter is this?`);
+            }
+
+            // Check the user's answer
+            function checkAnswer() {
+                const input = document.getElementById('practice-input').value.toLowerCase();
+                const feedbackArea = document.getElementById('feedback-area');
+                
+                if (input.length !== 1 || !/^[a-z]$/.test(input)) {
+                    feedbackArea.innerHTML = '<div class="feedback incorrect">Please enter a single letter</div>';
+                    announceToScreenReader('Please enter a single letter from A to Z', true);
+                    playErrorSound();
+                    return;
+                }
+                
+                totalCount++;
+                if (input === currentLetter) {
+                    correctCount++;
+                    feedback = '<div class="feedback correct">✓ Correct! Well done!</div>';
+                    announceToScreenReader(`Correct! The answer was ${currentLetter.toUpperCase()}`, true);
+                    playSuccessSound();
+                } else {
+                    feedback = `<div class="feedback incorrect">✗ Incorrect. The correct answer is ${currentLetter.toUpperCase()}</div>`;
+                    announceToScreenReader(`Incorrect. The correct answer was ${currentLetter.toUpperCase()}`, true);
+                    playErrorSound();
+                }
+                
+                updateScore();
+                feedbackArea.innerHTML = feedback;
+                document.getElementById('practice-input').value = '';
+                
+                setTimeout(() => {
+                    showRandomQuestion();
+                }, 1500);
+            }
+
+            // Skip the current question
+            function skipQuestion() {
+                showRandomQuestion();
+            }
+
+            // Update score display
+            function updateScore() {
+                const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+                document.getElementById('correct-count').textContent = correctCount;
+                document.getElementById('total-count').textContent = totalCount;
+                document.getElementById('accuracy').textContent = `${accuracy}%`;
+                document.getElementById('progress-fill').style.width = `${accuracy}%`;
+                document.getElementById('progress-fill').parentElement.setAttribute('aria-valuenow', accuracy);
+                
+                // Announce milestone achievements
+                if (totalCount === 10 || totalCount === 25 || totalCount === 50 || totalCount === 100) {
+                    announceToScreenReader(`Milestone reached! ${totalCount} questions completed with ${accuracy}% accuracy`);
+                }
+            }
+
+            // Translate text to Braille
+            function translateText() {
+                const input = document.getElementById('translate-input').value;
+                let result = '';
+                
+                for (const char of input.toLowerCase()) {
+                    result += BRAILLE_ALPHABET[char] || char;
+                }
+                
+                document.getElementById('translate-result').textContent = result || '⠀';
+            }
+
+            // Clear translation
+            function clearTranslate() {
+                document.getElementById('translate-input').value = '';
+                document.getElementById('translate-result').textContent = '⠀';
+            }
+
+            // Game Mode Functions
+            function setGameType(type) {
+                gameType = type;
+                document.getElementById('braille-to-text-btn').classList.toggle('active', type === 'braille-to-text');
+                document.getElementById('text-to-braille-btn').classList.toggle('active', type === 'text-to-braille');
+                resetGame();
+            }
+
+            function resetGame() {
+                gameAttempts = 10;
+                gameScore = 0;
+                gameTotal = 0;
+                document.getElementById('game-results').classList.add('hidden');
+                document.getElementById('game-question-area').classList.remove('hidden');
+                updateGameDisplay();
+                showGameQuestion();
+            }
+
+            function showGameQuestion() {
+                if (gameAttempts <= 0) {
+                    endGame();
+                    return;
+                }
+
+                const letters = Object.keys(BRAILLE_ALPHABET).filter(l => l !== ' ');
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                currentLetter = randomLetter;
+                currentBraille = BRAILLE_ALPHABET[randomLetter];
+                
+                const display = document.getElementById('game-display');
+                const prompt = document.getElementById('game-prompt');
+                const input = document.getElementById('game-input');
+
+                if (gameType === 'braille-to-text') {
+                    display.textContent = currentBraille;
+                    prompt.textContent = 'What letter is this?';
+                    input.placeholder = 'Type the letter...';
+                    input.maxLength = 1;
+                } else {
+                    display.textContent = currentLetter.toUpperCase();
+                    display.style.fontSize = '3em';
+                    prompt.textContent = 'What is the Braille for this letter?';
+                    input.placeholder = 'Type the Braille pattern (e.g., 1-2-3)...';
+                    input.maxLength = 20;
+                }
+
+                document.getElementById('game-input').value = '';
+                document.getElementById('game-feedback').innerHTML = '';
+                document.getElementById('game-input').focus();
+            }
+
+            function checkGameAnswer() {
+                const input = document.getElementById('game-input').value.toLowerCase().trim();
+                const feedbackArea = document.getElementById('game-feedback');
+                let isCorrect = false;
+
+                if (gameType === 'braille-to-text') {
+                    if (input.length !== 1 || !/^[a-z]$/.test(input)) {
+                        feedbackArea.innerHTML = '<div class="feedback incorrect">Please enter a single letter</div>';
+                        announceToScreenReader('Please enter a single letter', true);
+                        playErrorSound();
+                        return;
+                    }
+                    isCorrect = input === currentLetter;
+                } else {
+                    const pattern = BRAILLE_PATTERNS[currentLetter];
+                    isCorrect = input === pattern;
+                }
+
+                gameAttempts--;
+                gameTotal++;
+
+                if (isCorrect) {
+                    gameScore++;
+                    feedbackArea.innerHTML = '<div class="feedback correct">✓ Correct!</div>';
+                    announceToScreenReader('Correct!', true);
+                    playSuccessSound();
+                } else {
+                    const correctAnswer = gameType === 'braille-to-text' 
+                        ? currentLetter.toUpperCase() 
+                        : BRAILLE_PATTERNS[currentLetter];
+                    feedbackArea.innerHTML = `<div class="feedback incorrect">✗ Incorrect. The answer is ${correctAnswer}</div>`;
+                    announceToScreenReader(`Incorrect. The answer was ${correctAnswer}`, true);
+                    playErrorSound();
+                }
+
+                updateGameDisplay();
+                announceToScreenReader(`${gameAttempts} attempts remaining. Score: ${gameScore} out of ${gameTotal}`);
+
+                setTimeout(() => {
+                    if (gameAttempts > 0) {
+                        showGameQuestion();
+                    } else {
+                        endGame();
+                    }
+                }, 1500);
+            }
+
+            function updateGameDisplay() {
+                document.getElementById('attempts-remaining').textContent = gameAttempts;
+                document.getElementById('game-score').textContent = gameScore;
+                document.getElementById('game-total').textContent = gameTotal;
+            }
+
+            function endGame() {
+                document.getElementById('game-question-area').classList.add('hidden');
+                document.getElementById('game-results').classList.remove('hidden');
+                
+                const accuracy = gameTotal > 0 ? Math.round((gameScore / gameTotal) * 100) : 0;
+                document.getElementById('final-game-score').textContent = `${gameScore} / ${gameTotal}`;
+                document.getElementById('final-game-accuracy').textContent = `${accuracy}%`;
+                
+                let performanceMessage = '';
+                if (accuracy >= 90) {
+                    performanceMessage = 'Excellent work!';
+                    playSuccessSound();
+                } else if (accuracy >= 70) {
+                    performanceMessage = 'Good job!';
+                    playSuccessSound();
+                } else {
+                    performanceMessage = 'Keep practicing!';
+                }
+                
+                announceToScreenReader(`Game over! You scored ${gameScore} out of ${gameTotal}. ${accuracy}% accuracy. ${performanceMessage}`, true);
+            }
+
+            // Tutorial Mode Functions
+            function resetTutorial() {
+                // Select 5 random characters
+                const letters = Object.keys(BRAILLE_ALPHABET).filter(l => l !== ' ');
+                tutorialChars = [];
+                
+                while (tutorialChars.length < 5) {
+                    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                    if (!tutorialChars.includes(randomLetter)) {
+                        tutorialChars.push(randomLetter);
+                    }
+                }
+                
+                tutorialIndex = 0;
+                document.getElementById('tutorial-complete').classList.add('hidden');
+                document.getElementById('tutorial-content').classList.remove('hidden');
+                updateTutorialDisplay();
+            }
+
+            function updateTutorialDisplay() {
+                const letter = tutorialChars[tutorialIndex];
+                const braille = BRAILLE_ALPHABET[letter];
+                const pattern = BRAILLE_PATTERNS[letter];
+                const dots = pattern.split('-').filter(d => d).map(d => parseInt(d));
+
+                document.getElementById('tutorial-current').textContent = tutorialIndex + 1;
+                document.getElementById('tutorial-letter').textContent = letter.toUpperCase();
+                document.getElementById('tutorial-braille').textContent = braille;
+                document.getElementById('tutorial-pattern').textContent = pattern;
+
+                // Update progress dots
+                for (let i = 0; i < 5; i++) {
+                    const dot = document.getElementById(`tutorial-dot-${i}`);
+                    dot.classList.remove('completed', 'current');
+                    if (i < tutorialIndex) {
+                        dot.classList.add('completed');
+                    } else if (i === tutorialIndex) {
+                        dot.classList.add('current');
+                    }
+                }
+
+                // Update guide dots
+                for (let i = 1; i <= 6; i++) {
+                    const guideDot = document.getElementById(`tutorial-guide-${i}`);
+                    if (dots.includes(i)) {
+                        guideDot.style.background = '#667eea';
+                    } else {
+                        guideDot.style.background = 'var(--dot-inactive)';
+                    }
+                }
+
+                // Update buttons
+                document.getElementById('prev-tutorial-btn').disabled = tutorialIndex === 0;
+                document.getElementById('next-tutorial-btn').textContent = tutorialIndex === 4 ? 'Finish' : 'Next →';
+                
+                // Announce to screen reader
+                announceToScreenReader(
+                    `Character ${tutorialIndex + 1} of 5. Letter ${letter.toUpperCase()}. ${describeBraillePattern(pattern)}.`,
+                    true
+                );
+                playClickSound();
+            }
+
+            function nextTutorial() {
+                if (tutorialIndex < 4) {
+                    tutorialIndex++;
+                    updateTutorialDisplay();
+                } else {
+                    // Complete tutorial
+                    document.getElementById('tutorial-content').classList.add('hidden');
+                    document.getElementById('tutorial-complete').classList.remove('hidden');
+                    announceToScreenReader('Tutorial complete! You have learned 5 Braille characters. Congratulations!', true);
+                    playSuccessSound();
+                }
+            }
+
+            function previousTutorial() {
+                if (tutorialIndex > 0) {
+                    tutorialIndex--;
+                    updateTutorialDisplay();
+                }
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (currentMode === 'practice' && e.key === 'Enter') {
+                    checkAnswer();
+                } else if (currentMode === 'game' && e.key === 'Enter') {
+                    checkGameAnswer();
+                } else if (currentMode === 'tutorial') {
+                    if (e.key === 'ArrowRight') {
+                        nextTutorial();
+                    } else if (e.key === 'ArrowLeft') {
+                        previousTutorial();
+                    }
+                }
+            });
+
+            // Prevent autocomplete suggestions more aggressively
+            document.addEventListener('DOMContentLoaded', function() {
+                // More aggressive autofill prevention
+                const inputs = document.querySelectorAll('input[type="text"]');
+                inputs.forEach(input => {
+                    // Set a random name to prevent browser recognition
+                    const randomName = 'field_' + Math.random().toString(36).substring(7);
+                    input.setAttribute('name', randomName);
+                    
+                    // Clear any stored values
+                    input.value = '';
+                });
+                
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', function(event) {
+                    const now = Date.now();
+                    if (now - lastTouchEnd <= 300) {
+                        if (event.target.tagName === 'BUTTON' || 
+                            event.target.classList.contains('dot') ||
+                            event.target.classList.contains('alphabet-item')) {
+                            event.preventDefault();
+                        }
+                    }
+                    lastTouchEnd = now;
+                }, false);
+            });
+
+            // Handle orientation changes
+            window.addEventListener('orientationchange', function() {
+                announceToScreenReader('Screen orientation changed');
+            });
+
+            // Detect mobile device
+            function isMobileDevice() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                    || (window.innerWidth <= 768);
+            }
+
+            // Initialize the app
+            window.onload = function() {
+                initDarkMode();
+                showMode('alphabet');
+                initAlphabetGrid();
+                
+                // Welcome announcement for screen readers
+                setTimeout(() => {
+                    const isMobile = isMobileDevice();
+                    const navigationHint = isMobile 
+                        ? 'Tap to interact with elements.'
+                        : 'Press Tab to navigate through the interface.';
+                    announceToScreenReader(`Welcome to the Braille Learning App. ${navigationHint} Currently in Alphabet Reference Mode.`);
+                }, 1000);
+                
+                // Mobile-specific optimizations
+                if (isMobileDevice()) {
+                    // Add haptic feedback support if available
+                    if ('vibrate' in navigator) {
+                        const originalPlayClickSound = playClickSound;
+                        playClickSound = function() {
+                            originalPlayClickSound();
+                            navigator.vibrate(10);
+                        };
+                    }
+                }
+                
+                // Register service worker for PWA offline support
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+                        const CACHE_NAME = 'braille-app-v1';
+                        
+                        self.addEventListener('install', (event) => {
+                            event.waitUntil(
+                                caches.open(CACHE_NAME).then((cache) => {
+                                    return cache.addAll(['/']);
+                                })
+                            );
+                        });
+                        
+                        self.addEventListener('fetch', (event) => {
+                            event.respondWith(
+                                caches.match(event.request).then((response) => {
+                                    return response || fetch(event.request);
+                                })
+                            );
+                        });
+                    `)).then(() => {
+                        console.log('Service Worker registered for offline support');
+                    }).catch((err) => {
+                        console.log('Service Worker registration failed:', err);
+                    });
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>
