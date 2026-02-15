@@ -8,7 +8,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Braille Learn">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkJyYWlsbGUgTGVhcm5pbmcgQXBwIiwKICAic2hvcnRfbmFtZSI6ICJCcmFpbGxlIiwKICAiZGVzY3JpcHRpb24iOiAiTGVhcm4gQnJhaWxsZSB3aXRoIGludGVyYWN0aXZlIHByYWN0aWNlLCBnYW1lcywgYW5kIHR1dG9yaWFscyIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzY2N2VlYSIsCiAgInRoZW1lX2NvbG9yIjogIiM2NjdlZWEiLAogICJpY29ucyI6IFt7CiAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjM2NjdlZWEnLyUzRSUzQ3RleHQgeD0nNTAlMjUgeT0nNTUlMjUnIGZvbnQtc2l6ZT0nNjAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZpbGw9J3doaXRlJyUzRSVFMiVBMCU4MyUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsCiAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogIH1dCn0=">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23667eea'/%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle' fill='white'%3E⠃%3C/text%3E%3C/svg%3E">
     <title>Braille Learning App</title>
     <style>
         :root {
@@ -1794,29 +1795,13 @@
                 
                 // Register service worker for PWA offline support
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
-                        const CACHE_NAME = 'braille-app-v1';
-                        
-                        self.addEventListener('install', (event) => {
-                            event.waitUntil(
-                                caches.open(CACHE_NAME).then((cache) => {
-                                    return cache.addAll(['/']);
-                                })
-                            );
+                    navigator.serviceWorker.register('./sw.js')
+                        .then((registration) => {
+                            console.log('Service Worker registered successfully:', registration.scope);
+                        })
+                        .catch((error) => {
+                            console.log('Service Worker registration failed:', error);
                         });
-                        
-                        self.addEventListener('fetch', (event) => {
-                            event.respondWith(
-                                caches.match(event.request).then((response) => {
-                                    return response || fetch(event.request);
-                                })
-                            );
-                        });
-                    `)).then(() => {
-                        console.log('Service Worker registered for offline support');
-                    }).catch((err) => {
-                        console.log('Service Worker registration failed:', err);
-                    });
                 }
             }
         </script>
